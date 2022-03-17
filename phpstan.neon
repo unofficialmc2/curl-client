@@ -1,0 +1,11 @@
+parameters:
+    # editorUrl: 'vscode://file/%%file%%:%%line%%'
+    # editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
+    level: 6
+    paths:
+        - src
+        - Test
+    # bootstrapFiles:
+    #    - bootstrap/define.php
+    ignoreErrors:
+    #    - '#Strict comparison using === between PDOStatement and false will always evaluate to false.#'
