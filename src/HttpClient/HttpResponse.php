@@ -38,7 +38,7 @@ class HttpResponse
      */
     public function __construct($code, array $headers, string $data)
     {
-        $this->success = is_int($code);
+        $this->success = is_int($code) && $code >= 100 && $code < 400;
         $this->data = $data;
         $this->code = $code;
         $this->headers = $headers;
