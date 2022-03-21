@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace HttpClient;
 
-use JsonException;
-
 /**
  * Class ApiHttpResponse
  * Reponse retourner Par ApihttpClient
@@ -31,12 +29,12 @@ class HttpResponse
     private $code;
 
     /**
-     * ApiHttpResponse constructor.
+     * HttpResponse constructor.
      * @param int|false $code
      * @param array<string, string> $headers
      * @param string $data
      */
-    public function __construct($code, array $headers, string $data)
+    public function __construct($code, array $headers = [], string $data = '')
     {
         $this->success = is_int($code) && $code >= 100 && $code < 400;
         $this->data = $data;
@@ -80,6 +78,18 @@ class HttpResponse
     public function getHeaders(): array
     {
         return $this->headers;
+    }
+
+    /**
+     * Retourne le code de la réponse
+     * @return int
+     */
+    public function getCode(): int
+    {
+        if (is_int($this->code)) {
+            return $this->code;
+        }
+        return 500;
     }
 
     /**
