@@ -17,8 +17,8 @@ class HttpClient implements HttpClientInterface
     protected array $curlsParam = [];
     /** @var resource Resource qui est donner par curl_multi_init() */
     protected $curlMulHand;
-    /** @var LoggerInterface */
-    protected LoggerInterface $logger;
+    /** @var LoggerInterface|null */
+    protected ?LoggerInterface $logger;
     /** @var array<string,resource> liste des curl init */
     protected array $curls = [];
     /** @var array<string,HttpResponse> tableaux de résultat des curls */
@@ -29,9 +29,9 @@ class HttpClient implements HttpClientInterface
 
     /**
      * ApiHttpClient constructor.
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Psr\Log\LoggerInterface|null $logger
      */
-    public function __construct(LoggerInterface $logger)
+    public function __construct(?LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
@@ -53,6 +53,7 @@ class HttpClient implements HttpClientInterface
      */
     private function getClef(int $length): string
     {
+        /** @noinspection CryptographicallySecureRandomnessInspection */
         $data = openssl_random_pseudo_bytes($length, $strong);
         if (false === $strong || false === $data) {
             throw new RuntimeException("Un problème est survenu lors d'une génération cryptographique.");
@@ -80,7 +81,7 @@ class HttpClient implements HttpClientInterface
         foreach ($this->curlsParam as $clef => $curlparam) {
             $curl = $this->initNewCurl($curlparam);
             if (!$curl) {
-                $this->logger->error("Problème dans l'initialisation d'un curl", ["curlparam" => $curlparam]);
+                $this->log('error', "Problème dans l'initialisation d'un curl", ["curlparam" => $curlparam]);
                 return false;
             }
             $this->curls[$clef] = $curl;
@@ -128,6 +129,27 @@ class HttpClient implements HttpClientInterface
     }
 
     /**
+     * @param-stan 'error'|'debug' $type
+     * @param string $type
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    private function log(string $type, string $message, array $context = [])
+    {
+        if ($this->logger !== null) {
+            switch ($type) {
+                case 'error':
+                    $this->logger->error($message, $context);
+                    break;
+                case 'debug':
+                    $this->logger->debug($message, $context);
+                    break;
+            }
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function getResult(string $clef): HttpResponse
@@ -136,7 +158,7 @@ class HttpClient implements HttpClientInterface
             $this->waitResult();
         }
         if (!array_key_exists($clef, $this->curlResult)) {
-            $this->logger->error("La clef curl n'éxiste pas", ["clef Curl" => $clef]);
+            $this->log('error', "La clef curl n'éxiste pas", ["clef Curl" => $clef]);
             throw new RuntimeException("La clef curl n'éxiste pas");
         }
         return $this->curlResult[$clef];
@@ -157,7 +179,7 @@ class HttpClient implements HttpClientInterface
         $result = [];
         //Verifier les erreurs
         if ($status !== CURLM_OK) {
-            $this->logger->error("Error Curl", ["error" => curl_multi_strerror($status)]);
+            $this->log('error', "Error Curl", ["error" => curl_multi_strerror($status)]);
             throw new RuntimeException("Une erreur a eu lieu avec le serveur");
         }
         foreach ($this->curls as $clef => $curl) {
@@ -167,7 +189,7 @@ class HttpClient implements HttpClientInterface
             $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             $headers = $this->headerParse($splitedRep[0]);
             if ($response === null) {
-                $this->logger->error("Curl error", [curl_error($curl)]);
+                $this->log('error', "Curl error", [curl_error($curl)]);
                 $result[$clef] = new HttpResponse(false, $headers, curl_error($curl));
             } else {
                 $result[$clef] = new HttpResponse($code, $headers, $splitedRep[1]);
@@ -241,7 +263,7 @@ class HttpClient implements HttpClientInterface
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $headers = $this->headerParse($splitedRep[0]);
         if ($status !== CURLE_OK) {
-            $this->logger->error("Error Curl", ["error" => curl_strerror($status)]);
+            $this->log('error', "Error Curl", ["error" => curl_strerror($status)]);
             throw new RuntimeException("Une erreur a eu lieu avec le serveur");
         }
         if ($curlResult) {
