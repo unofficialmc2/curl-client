@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace HttpClientStub;
 
 use HttpClient\HttpClientInterface;
+use HttpClient\HttpMethod;
 use HttpClient\HttpResponse;
 use RuntimeException;
 
@@ -26,12 +27,13 @@ class HttpClient implements HttpClientInterface
      * @param string $data
      * @return string
      */
-    public function addParamRequest(string $url, array $headers, string $methode, string $data = ''): string
+    public function addParamRequest(string $url, array $headers = [], string $methode = HttpMethod::GET, string $data = ''): string
     {
 
         if (!isset($this->clefs[$this->index])) {
             throw new RuntimeException("Il n'y a pas assez d'éléments dans les résultats du stub");
         }
+
         $clef = $this->clefs[$this->index];
         $this->index++;
         return $clef;
@@ -55,6 +57,7 @@ class HttpClient implements HttpClientInterface
      */
     private function getClef(int $length): string
     {
+        /** @noinspection CryptographicallySecureRandomnessInspection */
         $data = openssl_random_pseudo_bytes($length / 2, $strong);
         if (false === $strong || false === $data) {
             throw new RuntimeException("Un problème est survenu lors d'une génération cryptographique.");
@@ -96,7 +99,7 @@ class HttpClient implements HttpClientInterface
      * @param string $data
      * @return HttpResponse
      */
-    public function curlUnique(string $url, array $headers, string $methode, string $data = ''): HttpResponse
+    public function curlUnique(string $url, array $headers = [], string $methode = HttpMethod::GET, string $data = ''): HttpResponse
     {
         if (!isset($this->clefs[$this->index])) {
             throw new RuntimeException("Il n'y a pas assez d'éléments dans les résultats du stub");

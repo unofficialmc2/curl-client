@@ -39,7 +39,7 @@ class HttpClient implements HttpClientInterface
     /**
      * @inheritDoc
      */
-    public function addParamRequest(string $url, array $headers, string $methode, string $data = ''): string
+    public function addParamRequest(string $url, array $headers = [], string $methode = HttpMethod::GET, string $data = ''): string
     {
         $clef = $this->getClef(8);
         $param = ["url" => $url, "headers" => $headers, "methode" => $methode, "data" => $data];
@@ -222,7 +222,7 @@ class HttpClient implements HttpClientInterface
     /**
      * @inheritDoc
      */
-    public function curlUnique(string $url, array $headers, string $methode, string $data = ''): HttpResponse
+    public function curlUnique(string $url, array $headers = [], string $methode = HttpMethod::GET, string $data = ''): HttpResponse
     {
         $curl = $this->initNewCurl([
             "url" => $url,
