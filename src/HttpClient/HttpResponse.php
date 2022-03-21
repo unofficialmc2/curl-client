@@ -45,13 +45,15 @@ class HttpResponse
     }
 
     /**
+     * @param bool $isJson
+     * @param bool $associative n'a auccun impact si $isJson = false
      * @return mixed
-     * @throws JsonException
+     * @throws \JsonException
      */
-    public function getData(bool $isJson = true)
+    public function getData(bool $isJson = true, bool $associative = true)
     {
         if ($isJson && !empty($this->data)) {
-            return json_decode($this->data, true, 512, JSON_THROW_ON_ERROR);
+            return json_decode($this->data, $associative, 512, JSON_THROW_ON_ERROR);
         }
         return $this->data;
     }
