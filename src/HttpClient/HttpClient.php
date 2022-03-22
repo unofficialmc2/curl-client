@@ -97,16 +97,30 @@ class HttpClient implements HttpClientInterface
     private function initNewCurl(array $curlparam)
     {
         $curl = curl_init($curlparam["url"]);
-        if (!$curl) {
+        if ($curl === false) {
             return false;
         }
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $curlparam["headers"]);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $this->headerAdapter($curlparam["headers"]));
         $this->setCurlMethode($curlparam["methode"], $curl, $curlparam["data"]);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $this->followLocation);
 
         return $curl;
+    }
+
+    /**
+     * adapter les headers pour CUrl
+     * @param array<string,mixed> $headers
+     * @return array<int,string>
+     */
+    private function headerAdapter(array $headers): array
+    {
+        $curlHeaders = [];
+        foreach ($headers as $key => $header) {
+            $curlHeaders[] = sprintf("%s: %s", $key, (string)$header);
+        }
+        return $curlHeaders;
     }
 
     /**
