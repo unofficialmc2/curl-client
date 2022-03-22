@@ -187,12 +187,12 @@ class HttpClient implements HttpClientInterface
             $response = curl_multi_getcontent($curl);
             $splitedRep = preg_split("/\r\n\r\n|\n\n/", $response);
             $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            $headers = $this->headerParse($splitedRep[0]);
+            $headers = $this->headerParse($splitedRep[0] ?? '');
             if ($response === null) {
                 $this->log('error', "Curl error", [curl_error($curl)]);
                 $result[$clef] = new HttpResponse(false, $headers, curl_error($curl));
             } else {
-                $result[$clef] = new HttpResponse($code, $headers, $splitedRep[1]);
+                $result[$clef] = new HttpResponse($code, $headers, $splitedRep[1] ?? '');
             }
             curl_multi_remove_handle($this->curlMulHand, $curl);
         }
@@ -207,6 +207,9 @@ class HttpClient implements HttpClientInterface
      */
     private function headerParse(string $rawHeaders): array
     {
+        if (empty($rawHeaders)) {
+            return [];
+        }
         $headers = [];
         $key = '';
         foreach (explode("\n", $rawHeaders) as $i => $h) {
