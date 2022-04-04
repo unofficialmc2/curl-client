@@ -40,7 +40,7 @@ class HttpClientTest extends TestCase
 
     public function testClient(): void
     {
-        $action = $this->getAction();
+        $action = $this->getClient();
         $clef1 = $action->addParamRequest("localhost:9874/ressources", [], HttpMethod::GET);
         $clef2 = $action->addParamRequest("localhost:9874/ressourcesbis", [], HttpMethod::GET);
         $action->execAll();
@@ -54,8 +54,20 @@ class HttpClientTest extends TestCase
         self::assertIsArray($rep2->getData());
     }
 
-    public function getAction(): HttpClient
+    public function getClient(): HttpClient
     {
         return new HttpClient($this->getLogger());
+    }
+
+    public function testClientTimeout(): void
+    {
+        $client = $this->getClient();
+        $client->setTimeout(1);
+        $response = $client->curlUnique('localhost:9874/timeout/2');
+        self::assertEquals(408, $response->getCode());
+
+        $client->setTimeout(3);
+        $response = $client->curlUnique('localhost:9874/timeout/1');
+        self::assertNotEquals(408, $response->getCode());
     }
 }

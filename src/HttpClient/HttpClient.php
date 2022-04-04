@@ -203,20 +203,42 @@ class HttpClient implements HttpClientInterface
         foreach ($this->curls as $clef => $curl) {
             /** @var string|null $response */
             $response = curl_multi_getcontent($curl);
-            $splitedRep = preg_split("/\r\n\r\n|\n\n/", $response);
             $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            $headers = $this->headerParse($splitedRep[0] ?? '');
-            if ($response === null) {
-                $this->log('error', "Curl error", [curl_error($curl)]);
-                $result[$clef] = new HttpResponse(false, $headers, curl_error($curl));
-            } else {
-                $result[$clef] = new HttpResponse($code, $headers, $splitedRep[1] ?? '');
-            }
+            $error = curl_error($curl);
+            $status = curl_errno($curl);
+            $result[$clef] = $this->makeResponse($status, $response, $code, $error);
             curl_multi_remove_handle($this->curlMulHand, $curl);
         }
         $this->curlResult = $result;
         $this->endOfProcess = true;
         $this->closeMultiCurl();
+    }
+
+    /**
+     * @param int $status
+     * @param null|bool|string $response
+     * @param mixed $code
+     * @param string $error
+     * @return \HttpClient\HttpResponse
+     */
+    private function makeResponse(int $status, $response, $code, string $error): HttpResponse
+    {
+        if ($status !== CURLE_OK) {
+            $this->log('error', "Error Curl", ["error" => curl_strerror($status)]);
+            switch ($status) {
+                case CURLE_OPERATION_TIMEOUTED:
+                    return new HttpResponse(408, [], 'TIMEOUT');
+                default:
+                    throw new RuntimeException("Une erreur a eu lieu avec le serveur");
+            }
+        }
+        if (!is_string($response)) {
+            $this->log('error', "Curl error", ["error" => $error]);
+            return new HttpResponse(false, [], $error);
+        }
+        $splitedRep = preg_split("/\r\n\r\n|\n\n/", $response);
+        $headers = $this->headerParse($splitedRep[0] ?? '');
+        return new HttpResponse($code, $headers, $splitedRep[1] ?? '');
     }
 
     /**
@@ -280,18 +302,9 @@ class HttpClient implements HttpClientInterface
 // Vérifie les erreurs et affiche le message d'erreur
         $curlResult = curl_exec($curl);
         $status = curl_errno($curl);
-        $splitedRep = preg_split("/\r\n\r\n|\n\n/", $curlResult);
         $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $headers = $this->headerParse($splitedRep[0]);
-        if ($status !== CURLE_OK) {
-            $this->log('error', "Error Curl", ["error" => curl_strerror($status)]);
-            throw new RuntimeException("Une erreur a eu lieu avec le serveur");
-        }
-        if ($curlResult) {
-            $response = new HttpResponse($code, $headers, $splitedRep[1]);
-        } else {
-            $response = new HttpResponse(false, $headers, curl_error($curl));
-        }
+        $error = curl_error($curl);
+        $response = $this->makeResponse($status, $curlResult, $code, $error);
         curl_close($curl);
         return $response;
     }
