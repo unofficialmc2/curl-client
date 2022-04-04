@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
-function str_starts_with($haystack, $needle)
+
+/**
+ * @param string $haystack
+ * @param string $needle
+ * @return bool
+ */
+function str_starts_with(string $haystack, string $needle): bool
 {
     return strpos($haystack, $needle) === 0;
 }

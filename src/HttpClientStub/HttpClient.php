@@ -113,4 +113,9 @@ class HttpClient implements HttpClientInterface
     public function followRedirect(): void
     {
     }
+
+    /** Stub */
+    public function setTimeout(int $timeout): void
+    {
+    }
 }

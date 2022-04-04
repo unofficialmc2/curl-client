@@ -54,4 +54,10 @@ interface HttpClientInterface
      * Cette fonction sert a indiqué que l'on suis la redirection
      */
     public function followRedirect():void;
+
+    /**
+     * défini un timeout pour les requêtes
+     * @param int $timeout exprimé en seconde
+     */
+    public function setTimeout(int $timeout): void;
 }

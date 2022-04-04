@@ -25,7 +25,10 @@ class HttpClient implements HttpClientInterface
     protected array $curlResult;
     /** @var bool indique si le process est fini */
     protected bool $endOfProcess = false;
+    /** @var bool flag pour savoir si on suit la redirection */
     private bool $followLocation = false;
+    /** @var int durée du time out */
+    private int $timeout = 30;
 
     /**
      * ApiHttpClient constructor.
@@ -105,6 +108,7 @@ class HttpClient implements HttpClientInterface
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $this->followLocation);
+        curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
 
         return $curl;
     }
@@ -146,10 +150,10 @@ class HttpClient implements HttpClientInterface
      * @param-stan 'error'|'debug' $type
      * @param string $type
      * @param string $message
-     * @param array $context
+     * @param array<string|int,string> $context
      * @return void
      */
-    private function log(string $type, string $message, array $context = [])
+    private function log(string $type, string $message, array $context = []): void
     {
         if ($this->logger !== null) {
             switch ($type) {
@@ -298,5 +302,13 @@ class HttpClient implements HttpClientInterface
     public function followRedirect(): void
     {
         $this->followLocation = true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setTimeout(int $timeout): void
+    {
+        $this->timeout = $timeout;
     }
 }
