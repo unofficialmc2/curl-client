@@ -227,7 +227,7 @@ class HttpClient implements HttpClientInterface
             $this->log('error', "Error Curl", ["error" => curl_strerror($status)]);
             switch ($status) {
                 case CURLE_OPERATION_TIMEOUTED:
-                    return new HttpResponse(408, [], 'TIMEOUT');
+                    return new HttpResponse(504, [], 'Temps d’attente de la réponse écoulé');
                 default:
                     throw new RuntimeException("Une erreur a eu lieu avec le serveur");
             }

@@ -64,10 +64,10 @@ class HttpClientTest extends TestCase
         $client = $this->getClient();
         $client->setTimeout(1);
         $response = $client->curlUnique('localhost:9874/timeout/2');
-        self::assertEquals(408, $response->getCode());
+        self::assertEquals(504, $response->getCode());
 
         $client->setTimeout(3);
         $response = $client->curlUnique('localhost:9874/timeout/1');
-        self::assertNotEquals(408, $response->getCode());
+        self::assertNotEquals(504, $response->getCode());
     }
 }
