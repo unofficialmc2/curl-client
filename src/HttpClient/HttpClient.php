@@ -224,11 +224,12 @@ class HttpClient implements HttpClientInterface
     private function makeResponse(int $status, $response, $code, string $error): HttpResponse
     {
         if ($status !== CURLE_OK) {
-            $this->log('error', "Error Curl", ["error" => curl_strerror($status)]);
             switch ($status) {
                 case CURLE_OPERATION_TIMEOUTED:
+                    $this->log('notice', "Curl n'a pas reçu de réponse dans les temps");
                     return new HttpResponse(504, [], 'Temps d’attente de la réponse écoulé');
                 default:
+                    $this->log('error', "Error Curl", ["error" => curl_strerror($status)]);
                     throw new RuntimeException("Une erreur a eu lieu avec le serveur");
             }
         }
