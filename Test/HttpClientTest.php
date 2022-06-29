@@ -70,4 +70,22 @@ class HttpClientTest extends TestCase
         $response = $client->curlUnique('localhost:9874/timeout/1');
         self::assertNotEquals(504, $response->getCode());
     }
+
+
+    public function testClientRedirect(): void
+    {
+        $client = $this->getClient();
+        $response = $client->curlUnique('localhost:9874/status/302');
+        self::assertEquals(302, $response->getCode());
+    }
+
+
+    public function testClientRedirectAllowed(): void
+    {
+        $client = $this->getClient();
+        $client->followRedirect();
+        $response = $client->curlUnique('localhost:9874/status/302?r=/status/400');
+        self::assertEquals(400, $response->getCode());
+        self::assertEquals("/status/400", $response->getHeader('location'));
+    }
 }
