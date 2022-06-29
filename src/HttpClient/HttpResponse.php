@@ -39,7 +39,7 @@ class HttpResponse
         $this->success = is_int($code) && $code >= 100 && $code < 400;
         $this->data = $data;
         $this->code = $code;
-        $this->headers = $headers;
+        $this->headers =array_change_key_case($headers, CASE_LOWER);
     }
 
     /**
