@@ -59,7 +59,7 @@ class HttpClient implements HttpClientInterface
     {
         /** @noinspection CryptographicallySecureRandomnessInspection */
         $data = openssl_random_pseudo_bytes($length / 2, $strong);
-        if (false === $strong || false === $data) {
+        if (false === $strong) {
             throw new RuntimeException("Un problème est survenu lors d'une génération cryptographique.");
         }
         return bin2hex($data);
