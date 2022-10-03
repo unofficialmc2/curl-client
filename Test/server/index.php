@@ -1,16 +1,6 @@
 <?php
 declare(strict_types=1);
 
-/**
- * @param string $haystack
- * @param string $needle
- * @return bool
- */
-function str_starts_with(string $haystack, string $needle): bool
-{
-    return strpos($haystack, $needle) === 0;
-}
-
 $return = [];
 foreach ($_SERVER as $k => $v) {
     $return[$k] = $v;
