@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace HttpClient;
 
+use CurlHandle;
+use CurlMultiHandle;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 
@@ -15,11 +17,11 @@ class HttpClient implements HttpClientInterface
 
     /** @var array<string, mixed> Tableaux de paramètre pour les different curl */
     protected array $curlsParam = [];
-    /** @var resource Resource qui est donner par curl_multi_init() */
-    protected $curlMulHand;
+    /** @var \CurlMultiHandle|null Resource qui est donné par curl_multi_init() */
+    protected ?CurlMultiHandle $curlMulHand = null;
     /** @var LoggerInterface|null */
     protected ?LoggerInterface $logger;
-    /** @var array<string,resource> liste des curl init */
+    /** @var array<string,CurlHandle> liste des curl init */
     protected array $curls = [];
     /** @var array<string,HttpResponse> tableaux de résultat des curls */
     protected array $curlResult;
@@ -58,7 +60,7 @@ class HttpClient implements HttpClientInterface
     {
         /** @noinspection CryptographicallySecureRandomnessInspection */
         $data = openssl_random_pseudo_bytes($length, $strong);
-        if (false === $strong || false === $data) {
+        if (false === $strong) {
             throw new RuntimeException("Un problème est survenu lors d'une génération cryptographique.");
         }
         return substr(bin2hex($data), $length);
@@ -70,7 +72,7 @@ class HttpClient implements HttpClientInterface
     public function execAll(): void
     {
         $this->endOfProcess = false;
-        $active = null;
+        $active = 0;
         $this->initAll();
         curl_multi_exec($this->curlMulHand, $active);
     }
@@ -95,9 +97,9 @@ class HttpClient implements HttpClientInterface
 
     /**
      * @param array<string,mixed> $curlparam
-     * @return false|resource
+     * @return false|CurlHandle
      */
-    private function initNewCurl(array $curlparam)
+    private function initNewCurl(array $curlparam): CurlHandle|bool
     {
         $curl = curl_init($curlparam["url"]);
         if ($curl === false) {
@@ -129,10 +131,10 @@ class HttpClient implements HttpClientInterface
 
     /**
      * @param string $methode
-     * @param resource $curl
+     * @param CurlHandle $curl
      * @param string $data
      */
-    private function setCurlMethode(string $methode, $curl, string $data): void
+    private function setCurlMethode(string $methode, CurlHandle $curl, string $data): void
     {
         switch ($methode) :
             case HttpMethod::GET:
@@ -216,12 +218,12 @@ class HttpClient implements HttpClientInterface
 
     /**
      * @param int $status
-     * @param null|bool|string $response
+     * @param bool|string|null $response
      * @param mixed $code
      * @param string $error
      * @return \HttpClient\HttpResponse
      */
-    private function makeResponse(int $status, $response, $code, string $error): HttpResponse
+    private function makeResponse(int $status, bool|string|null $response, mixed $code, string $error): HttpResponse
     {
         if ($status !== CURLE_OK) {
             switch ($status) {
@@ -280,8 +282,9 @@ class HttpClient implements HttpClientInterface
      */
     private function closeMultiCurl(): void
     {
-        if (is_resource($this->curlMulHand)) {
+        if (null !== $this->curlMulHand) {
             curl_multi_close($this->curlMulHand);
+            $this->curlMulHand = null;
         }
     }
 

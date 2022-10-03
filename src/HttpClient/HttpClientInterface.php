@@ -12,7 +12,7 @@ namespace HttpClient;
 interface HttpClientInterface
 {
     /**
-     * stocke dans un tableaux les paramettre et renvoie une clef d'identification
+     * stocke dans un tableau les paramètres et renvoie une clef d'identification
      * @param string $url
      * @param array<string, mixed> $headers
      * @param string $methode
@@ -29,19 +29,20 @@ interface HttpClientInterface
 
 
     /**
-     * Fonction qui attend les resultats de tout les curls
+     * Fonction qui attend les résultats de tout les curls
      */
     public function waitResult(): void;
 
     /**
      * @param string $clef
      * @return HttpResponse
-     * Fonction qui retourne l'objet contenu du tableaux de résultat en fonction de la clef
+     * Fonction qui retourne l'objet contenu du tableau de résultats en fonction de la clef
      */
     public function getResult(string $clef) :HttpResponse;
 
 
     /**
+     * exécute une requête unique
      * @param string $url
      * @param array<string, mixed> $headers
      * @param string $methode
@@ -51,7 +52,7 @@ interface HttpClientInterface
     public function curlUnique(string $url, array $headers, string $methode, string $data = ''):HttpResponse;
 
     /**
-     * Cette fonction sert a indiqué que l'on suis la redirection
+     * Cette fonction sert à indiquer que l'on suit la redirection
      */
     public function followRedirect():void;
 
