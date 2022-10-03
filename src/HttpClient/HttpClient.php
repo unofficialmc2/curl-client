@@ -72,7 +72,7 @@ class HttpClient implements HttpClientInterface
     public function execAll(): void
     {
         $this->endOfProcess = false;
-        $active = null;
+        $active = 0;
         $this->initAll();
         curl_multi_exec($this->curlMulHand, $active);
     }
@@ -218,12 +218,12 @@ class HttpClient implements HttpClientInterface
 
     /**
      * @param int $status
-     * @param null|bool|string $response
+     * @param bool|string|null $response
      * @param mixed $code
      * @param string $error
      * @return \HttpClient\HttpResponse
      */
-    private function makeResponse(int $status, $response, $code, string $error): HttpResponse
+    private function makeResponse(int $status, bool|string|null $response, mixed $code, string $error): HttpResponse
     {
         if ($status !== CURLE_OK) {
             switch ($status) {
