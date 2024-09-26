@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace HttpClient;
 
+use function PHPUnit\Framework\isNull;
+
 /**
  * Class ApiHttpResponse
  * Reponse retourner Par ApihttpClient

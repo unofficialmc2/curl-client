@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Test;
 
+use RuntimeException;
 use HttpClient\HttpClient;
 use HttpClient\HttpMethod;
 use Symfony\Component\Process\Process;
@@ -87,5 +88,40 @@ class HttpClientTest extends TestCase
         $response = $client->curlUnique('localhost:9874/status/302?r=/status/400');
         self::assertEquals(400, $response->getCode());
         self::assertEquals("/status/400", $response->getHeader('location'));
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    public function testClearParamRequest(): void
+    {
+        $action = $this->getClient();
+        $clef1 = $action->addParamRequest("localhost:9874/ressources", [], HttpMethod::GET);
+        $clef2 = $action->addParamRequest("localhost:9874/ressourcesbis", [], HttpMethod::GET);
+        $action->execAll();
+        $rep1 = $action->getResult($clef1);
+        $rep2 = $action->getResult($clef2);
+
+        self::assertTrue($rep1->isSuccess());
+        self::assertTrue($rep2->isSuccess());
+        self::assertIsArray($rep1->getHeaders());
+        self::assertIsArray($rep2->getHeaders());
+        self::assertIsArray($rep1->getData());
+        self::assertIsArray($rep2->getData());
+
+        $action->clearParamRequestAndResult();
+        $clef3 = $action->addParamRequest("localhost:9874/ressourcesTer", [], HttpMethod::GET);
+        $action->execAll();
+        $rep3 = $action->getResult($clef3);
+
+        self::assertTrue($rep3->isSuccess());
+        self::assertIsArray($rep3->getHeaders());
+        self::assertIsArray($rep3->getData());
+
+        // S'assurer que l'exception RuntimeException avec le bon message est levée
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('La clef curl n\'éxiste pas');
+
+        $rep1b = $action->getResult($clef1);
     }
 }

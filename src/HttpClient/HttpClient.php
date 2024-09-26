@@ -53,6 +53,16 @@ class HttpClient implements HttpClientInterface
     }
 
     /**
+     * @return void
+     */
+    public function clearParamRequestAndResult():void
+    {
+        $this->curlsParam = [];
+        $this->curlResult = [];
+        $this->curls = [];
+    }
+
+    /**
      * @param int $length
      * @return string
      */
