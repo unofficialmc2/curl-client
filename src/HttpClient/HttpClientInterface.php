@@ -49,7 +49,7 @@ interface HttpClientInterface
      * @param string $data
      * @return HttpResponse
      */
-    public function curlUnique(string $url, array $headers, string $methode, string $data = ''):HttpResponse;
+    public function curlUnique(string $url, array $headers, string $methode, string $data = '', bool $ssl_verify=true):HttpResponse;
 
     /**
      * Cette fonction sert à indiquer que l'on suit la redirection
