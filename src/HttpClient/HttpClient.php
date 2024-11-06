@@ -121,6 +121,10 @@ class HttpClient implements HttpClientInterface
         curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $this->followLocation);
         curl_setopt($curl, CURLOPT_TIMEOUT, $this->timeout);
+        if ($curlparam['ssl_verify'] === false) {
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        }
 
         return $curl;
     }
@@ -301,14 +305,15 @@ class HttpClient implements HttpClientInterface
     /**
      * @inheritDoc
      */
-    public function curlUnique(string $url, array $headers = [], string $methode = HttpMethod::GET, string $data = ''): HttpResponse
+    public function curlUnique(string $url, array $headers = [], string $methode = HttpMethod::GET, string $data = '', bool $ssl_verify=true): HttpResponse
     {
         $curl = $this->initNewCurl([
             "url" => $url,
             "headers" => $headers,
             "methode" => $methode,
             "data" => $data,
-            "post" => $methode === HttpMethod::POST
+            "post" => $methode === HttpMethod::POST,
+            "ssl_verify" => $ssl_verify
         ]);
         if (!$curl) {
             throw new RuntimeException("Erreur de curl ");
