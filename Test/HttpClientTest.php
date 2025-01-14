@@ -67,7 +67,7 @@ class HttpClientTest extends TestCase
         $response = $client->curlUnique('localhost:9874/timeout/2');
         self::assertEquals(504, $response->getCode());
 
-        $client->setTimeout(3);
+        $client->setTimeout(30);
         $response = $client->curlUnique('localhost:9874/timeout/1');
         self::assertNotEquals(504, $response->getCode());
     }

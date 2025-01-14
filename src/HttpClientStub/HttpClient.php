@@ -97,9 +97,10 @@ class HttpClient implements HttpClientInterface
      * @param array<string, mixed> $headers
      * @param string $methode
      * @param string $data
+     * @param bool $ssl_verify
      * @return HttpResponse
      */
-    public function curlUnique(string $url, array $headers = [], string $methode = HttpMethod::GET, string $data = ''): HttpResponse
+    public function curlUnique(string $url, array $headers = [], string $methode = HttpMethod::GET, string $data = '', bool $ssl_verify = true): HttpResponse
     {
         if (!isset($this->clefs[$this->index])) {
             throw new RuntimeException("Il n'y a pas assez d'éléments dans les résultats du stub");
